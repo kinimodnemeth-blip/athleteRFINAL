@@ -1,0 +1,30 @@
+Package: athleteR
+Title: Sports and Athletics Data Analysis Tools
+Version: 0.1.0
+Authors@R: 
+    person("Student", "Author", email = "student@university.edu", role = c("aut", "cre"))
+Description: A comprehensive toolkit for analyzing sports and athletics performance data.
+    Provides functions for computing athlete performance metrics, comparing players across
+    seasons, visualizing athletic trends, and summarizing team statistics. Designed for
+    sports analysts, coaches, and researchers working with structured athletic datasets.
+    Includes built-in sample datasets and S3 classes for athlete and team objects.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 4.0.0)
+Imports:
+    stats,
+    graphics,
+    grDevices,
+    utils
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+LazyData: true
+URL: https://github.com/studentauthor/athleteR
+BugReports: https://github.com/studentauthor/athleteR/issues

@@ -1,0 +1,222 @@
+---
+title: "Getting Started with athleteR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with athleteR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+library(athleteR)
+```
+
+## Introduction
+
+**athleteR** is an R package designed for sports scientists, coaches, and
+analysts who need reproducible tools to explore and communicate athletic
+performance data. It provides:
+
+- S3 classes (`athlete`, `team`) for structured representation of sports data  
+- Functions to compute performance scores, rank athletes, and measure consistency  
+- Base-R visualizations (line charts, bar charts, radar plots)  
+- Two built-in datasets for immediate exploration
+
+---
+
+## 1. Creating Athlete Objects
+
+The foundational unit in **athleteR** is the `athlete` S3 object. Use
+`new_athlete()` to create one:
+
+```{r create-athletes}
+a1 <- new_athlete(
+  name     = "Jordan Smith",
+  sport    = "basketball",
+  position = "guard",
+  age      = 26,
+  stats    = c(points = 22.4, assists = 7.1, rebounds = 4.3),
+  seasons  = 4
+)
+
+a2 <- new_athlete(
+  name     = "Alex Rivera",
+  sport    = "basketball",
+  position = "forward",
+  age      = 29,
+  stats    = c(points = 18.8, assists = 4.2, rebounds = 9.5),
+  seasons  = 7
+)
+
+print(a1)
+```
+
+`summary()` provides a statistical overview of the athlete's stats:
+
+```{r summary-athlete}
+summary(a1)
+```
+
+---
+
+## 2. Building a Team
+
+Group multiple `athlete` objects into a `team`:
+
+```{r create-team}
+a3 <- new_athlete("Morgan Lee", "basketball", "center", 31,
+                  c(points = 14.0, assists = 2.9, rebounds = 11.2), 9)
+
+squad <- new_team(
+  name     = "Thunder Hawks",
+  sport    = "basketball",
+  athletes = list(a1, a2, a3),
+  season   = "2025-26"
+)
+
+print(squad)
+```
+
+### Team Summary
+
+`team_summary()` aggregates statistics across all roster members:
+
+```{r team-summary}
+team_summary(squad)
+```
+
+---
+
+## 3. Performance Scoring
+
+`performance_score()` computes a weighted composite metric. By default all
+statistics are weighted equally (summed). Custom weights let you emphasise
+the metrics most relevant to your sport.
+
+```{r perf-score}
+# Equal weighting
+performance_score(a1)
+
+# Prioritise points over other metrics
+performance_score(a1, weights = c(points = 3, assists = 1.5, rebounds = 1))
+```
+
+---
+
+## 4. Comparing Athletes
+
+`compare_athletes()` returns a tidy data frame aligning shared statistics
+side by side, making it easy to identify strengths and gaps:
+
+```{r compare}
+compare_athletes(a1, a2, a3)
+```
+
+---
+
+## 5. Working with the Built-in Datasets
+
+**athleteR** ships with two ready-to-use datasets.
+
+### `sample_athletes` — cross-sectional
+
+```{r sample-athletes}
+data(sample_athletes)
+head(sample_athletes)
+```
+
+Find the top 5 scorers:
+
+```{r top5}
+top_performers(sample_athletes, metric = "points", n = 5)
+```
+
+Normalize statistics to a 0–100 scale for fair comparison:
+
+```{r normalize}
+norm_df <- normalize_stats(sample_athletes, columns = c("points", "assists"))
+head(norm_df[, c("name", "sport", "points", "assists")])
+```
+
+### `sample_seasons` — longitudinal
+
+```{r sample-seasons}
+data(sample_seasons)
+head(sample_seasons)
+```
+
+Compute season-over-season growth:
+
+```{r growth}
+growth_df <- season_growth(sample_seasons, "name", "season", "points")
+head(growth_df[!is.na(growth_df$growth_pct), ])
+```
+
+Measure consistency (lower CV = more consistent):
+
+```{r consistency}
+consistency_index(sample_seasons, id_col = "name", stat_col = "points")
+```
+
+---
+
+## 6. Visualizations
+
+### Performance Over Time
+
+```{r plot-perf, fig.cap="Season-by-season points for selected athletes"}
+plot_performance(
+  data       = sample_seasons,
+  id_col     = "name",
+  season_col = "season",
+  stat_col   = "points",
+  athletes   = unique(sample_seasons$name)[1:4],
+  title      = "Points Per Season (2018–2025)"
+)
+```
+
+### Top Performers Bar Chart
+
+```{r plot-top, fig.cap="Top 8 athletes by points"}
+plot_top_performers(sample_athletes, metric = "points", n = 8,
+                    title = "Top 8 Scorers", color = "steelblue")
+```
+
+### Radar Chart Comparison
+
+```{r radar, fig.cap="Head-to-head radar comparison"}
+plot_radar(a1, a2, title = "Jordan Smith vs Alex Rivera")
+```
+
+---
+
+## 7. Summary of Functions
+
+| Function | Description |
+|---|---|
+| `new_athlete()` | Create an `athlete` S3 object |
+| `new_team()` | Create a `team` S3 object |
+| `performance_score()` | Weighted composite score |
+| `compare_athletes()` | Side-by-side stat comparison |
+| `team_summary()` | Aggregate team statistics |
+| `top_performers()` | Rank athletes by a metric |
+| `normalize_stats()` | Min-max normalize to 0–100 |
+| `season_growth()` | Season-over-season growth % |
+| `consistency_index()` | Coefficient of variation |
+| `plot_performance()` | Line chart over seasons |
+| `plot_top_performers()` | Horizontal bar chart |
+| `plot_radar()` | Radar/spider comparison chart |
+
+---
+
+## Session Info
+
+```{r session-info}
+sessionInfo()
+```
